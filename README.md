@@ -1,6 +1,6 @@
-# This is a Template Repository for a Python Package
-Following the best practices given by: [Scientific Python Library Development Guide](https://learn.scientific-python.org/development/)
+# Signal Generator Package
 
+This package is designed to simplify the creation and manipulation of various audio signals for testing, analysis, and synthesis in scientific and engineering applications.
 
 ## Table of Contents
 
@@ -15,52 +15,78 @@ Following the best practices given by: [Scientific Python Library Development Gu
 
 ## Description
 
-This is a template repository for a Python package. It is meant to be used as a starting point for creating a new Python package.
+The signal_generator package provides a comprehensive toolkit for generating audio signals including sine waves, square waves, sawtooth waves, chirps, and logarithmic sweeps. It allows for precise control over signal characteristics such as frequency, amplitude, duration, and placement within a duration of silence, facilitating a wide range of applications from acoustics research to audio processing testing.
 
 ## Installation
 
-To install the package type:
+Clone the repository to your local machine:
 
 ```bash
-pip install template_for_python_package
+git clone https://github.com/francescopapaleo/signal-generator.git
+```
+
+Install the package typing:
+
+```bash
+pip install -e .
 ```
 
 
 ## Usage
 
-To use this template repository to create a new Python package, click on the "Use this template" button at the top of the page. Then, follow the instructions to create a new repository based on this template. Once you have created the new repository, you can clone it to your local machine and start adding your own code to it.
+Here's a quick example to generate a 440 Hz sine wave, place it 1 second into a 5-second duration, and save it as a WAV file:
+
+```python
+from signal_generator import SignalGenerator
+
+# Initialize the signal generator
+gen = SignalGenerator()
+
+# Generate a 440 Hz sine wave
+signal = gen.generate_tone(pitch=440, duration=5, waveform='sin', start_time=1, max_amplitude_dbfs=-3)
+
+# Save the signal to a file
+gen.save_signal(signal, './', 'sine_wave_440Hz.wav')
+```
 
 
 ## Folder Structure
 
 ```bash
-template-for-python-package/
-├── template_for_python_package/
-│   ├── __init__.py
-│   └── (your modules here)
-├── tests/
-│   └── (your test scripts here)
-├── docs/
-│   └── (documentation files)
-├── examples/
-│   └── (example scripts and notebooks)
-├── scripts/
-│   └── (additional scripts)
-├── setup.py
-├── setup.cfg
-├── requirements.txt
-├── README.md
+.
 ├── LICENSE
-└── .gitignore
+├── README.md
+├── docs
+│   ├── conf.py
+│   ├── index.md
+│   └── tutorials
+│       ├── first-steps.md
+│       ├── installation.md
+│       └── real-application.md
+├── examples
+├── pyproject.toml
+├── setup.cfg
+├── setup.py
+├── src
+│   └── signal_generator
+│       ├── __init__.py
+│       ├── __pycache__
+│       │   ├── __init__.cpython-310.pyc
+│       │   └── core.cpython-310.pyc
+│       └── core.py
+└── tests
+    └── test_core.py
 ```
 
 
 ## Acknowledgements
 
+Thanks to the Community behind: [Scientific Python Library Development Guide](https://learn.scientific-python.org/development/)
+Thanks to @xaviliz for his [signalGenerator](https://github.com/xaviliz/signalGenerator/tree/master) from which this package is inspired 
 
 ## License
 
-This package is distributed under the GNU Affero GPL License
+This package is distributed under the GNU Affero GPL License. For more information, see the [LICENSE](LICENSE) file.
 
 
 ## Citation
@@ -68,11 +94,11 @@ This package is distributed under the GNU Affero GPL License
 If you plan to use this project in your work please consider citing it:
 
 ```bibtex
-@misc{template_for_python_package,
-  title = {Template for Python Package},
+@misc{signal_generator,
+  title = {Signal Generator Package},
   author = {Francesco Papaleo},
   year = {2024},
   howpublished = {GitHub},
-  url = {https://github.com/francescopapaleo/template_for_python_package}
+  url = {https://github.com/francescopapaleo/signal_generator}
 }
 ```

@@ -3,9 +3,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "example"
+name = "signal_generator"
 version = "0.1.0"
-description = "A template for Python packages"
+description = "Generate audio signals"
 authors = [{name = "Francesco Papaleo"}]
 license = {file = "LICENSE"}
 readme = "README.md"
@@ -23,12 +23,16 @@ dependencies = [
     "black",
     "mypy",
     "hatchling",
+    "numpy",
+    "scipy",
+    "matplotlib",
+    "soundfile",
 ]
 
 [project.urls]
-homepage = "https://github.com/francescopapaleo/template_for_python_package"
-repository = "https://github.com/francescopapaleo/template_for_python_package"
-documentation = "https://github.com/francescopapaleo/template_for_python_package/docs"
+homepage = "https://github.com/francescopapaleo/signal-generator"
+repository = "https://github.com/francescopapaleo/signal-generator"
+documentation = "https://github.com/francescopapaleo/signal-generator/docs"
 
 [tool.black]
 line-length = 88
