@@ -7,4 +7,3 @@ tutorials/installation.md
 tutorials/first-steps.md
 tutorials/real-application.md
 ```
-

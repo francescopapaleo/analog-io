@@ -1,5 +1,8 @@
-# This is a Template Repository for a Python Package
-Following the best practices given by: [Scientific Python Library Development Guide](https://learn.scientific-python.org/development/)
+# Analog I/O Tools for Python
+
+![GitHub License](https://img.shields.io/github/license/francescopapaleo/analog-io)
+[![codecov](https://codecov.io/gh/francescopapaleo/analog-io/graph/badge.svg?token=7BT4XETDXS)](https://codecov.io/gh/francescopapaleo/analog-io)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/francescopapaleo/analog-io/main.yaml)
 
 
 ## Table of Contents
@@ -15,52 +18,79 @@ Following the best practices given by: [Scientific Python Library Development Gu
 
 ## Description
 
-This is a template repository for a Python package. It is meant to be used as a starting point for creating a new Python package.
+Analog I/O Tools for Python is a library that provides tools to playback and record analog signals using hardware.
 
 ## Installation
 
-To install the package type:
+To install the package, run the following command:
 
 ```bash
-pip install template_for_python_package
+pip install git+https://github.com/francescopapaleo/analog-io.git
+```
+
+In case you need an editable installation, clone the repository:
+
+```bash
+git clone https://github.com/francescopapaleo/analog-io.git
+```
+Then, navigate to the root directory of the repository and install the package:
+
+```bash
+pip install -e .
 ```
 
 
 ## Usage
 
-To use this template repository to create a new Python package, click on the "Use this template" button at the top of the page. Then, follow the instructions to create a new repository based on this template. Once you have created the new repository, you can clone it to your local machine and start adding your own code to it.
+Compute the latency of the hardware:
+
+```python
+from analog_io import HardwareLatencyMeasure
+
+tester = HardwareLatencyMeasure()
+tester.select_device_and_channels()
+latency_time, latency_index = tester.measure_latency()
+```
+
+More examples can be found in the [examples](examples) folder.
 
 
 ## Folder Structure
 
 ```bash
-template-for-python-package/
-├── template_for_python_package/
-│   ├── __init__.py
-│   └── (your modules here)
-├── tests/
-│   └── (your test scripts here)
-├── docs/
-│   └── (documentation files)
-├── examples/
-│   └── (example scripts and notebooks)
-├── scripts/
-│   └── (additional scripts)
-├── setup.py
-├── setup.cfg
-├── requirements.txt
-├── README.md
+.
 ├── LICENSE
-└── .gitignore
+├── README.md
+├── docs
+│   ├── conf.py
+│   ├── index.md
+│   └── tutorials
+│       ├── first-steps.md
+│       ├── installation.md
+│       └── real-application.md
+├── examples
+│   └── dataset_pipeline.py
+├── pyproject.toml
+├── setup.cfg
+├── setup.py
+├── src
+│   └── analog_io
+│       ├── __init__.py
+│       └── core.py
+└── tests
+    └── test_core.py
 ```
 
 
 ## Acknowledgements
 
+[Scientific Python Library Development Guide](https://learn.scientific-python.org/development/)
+
 
 ## License
 
-This package is distributed under the GNU Affero GPL License
+This package is distributed under the GNU General Public License.
+For more information, see the [LICENSE](LICENSE) file.
 
 
 ## Citation
@@ -68,11 +98,11 @@ This package is distributed under the GNU Affero GPL License
 If you plan to use this project in your work please consider citing it:
 
 ```bibtex
-@misc{template_for_python_package,
-  title = {Template for Python Package},
+@misc{papaleo2024analog-io,
+  title = {Analog I/O Package},
   author = {Francesco Papaleo},
   year = {2024},
   howpublished = {GitHub},
-  url = {https://github.com/francescopapaleo/template_for_python_package}
+  url = {https://github.com/francescopapaleo/analog-io}
 }
 ```

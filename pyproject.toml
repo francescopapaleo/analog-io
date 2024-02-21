@@ -3,9 +3,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "example"
+name = "analog_io"
 version = "0.1.0"
-description = "A template for Python packages"
+description = "Analog I/O tools for Python"
 authors = [{name = "Francesco Papaleo"}]
 license = {file = "LICENSE"}
 readme = "README.md"
@@ -14,21 +14,27 @@ requires-python = ">=3.10"
 
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "pytest",
-    "flake8",
-    "black",
-    "mypy",
-    "hatchling",
+  "numpy",
+  "scipy",
+  "soundfile",
+  "sounddevice",
 ]
 
+[project.optional-dependencies]
+test = [
+  "pytest>=6.0",
+  "pytest-cov",
+]
+
+
 [project.urls]
-homepage = "https://github.com/francescopapaleo/template_for_python_package"
-repository = "https://github.com/francescopapaleo/template_for_python_package"
-documentation = "https://github.com/francescopapaleo/template_for_python_package/docs"
+homepage = "https://github.com/francescopapaleo/analog-io"
+repository = "https://github.com/francescopapaleo/analog-io"
+documentation = "https://github.com/francescopapaleo/analog-io/docs"
 
 [tool.black]
 line-length = 88
@@ -42,7 +48,12 @@ exclude = '''
 )/
 '''
 
-[tool.pytest]
-junit_family = "xunit2"
-testpaths = ["tests"]
-
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
+xfail_strict = true
+filterwarnings = ["error"]
+log_cli_level = "info"
+testpaths = [
+  "tests",
+]
