@@ -1,0 +1,48 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "example"
+version = "0.1.0"
+description = "A template for Python packages"
+authors = [{name = "Francesco Papaleo"}]
+license = {file = "LICENSE"}
+readme = "README.md"
+
+requires-python = ">=3.10"
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "pytest",
+    "flake8",
+    "black",
+    "mypy",
+    "hatchling",
+]
+
+[project.urls]
+homepage = "https://github.com/francescopapaleo/template_for_python_package"
+repository = "https://github.com/francescopapaleo/template_for_python_package"
+documentation = "https://github.com/francescopapaleo/template_for_python_package/docs"
+
+[tool.black]
+line-length = 88
+include = '\.pyi?$'
+exclude = '''
+/(
+    .git
+    | __pycache__
+    | build
+    | dist
+)/
+'''
+
+[tool.pytest]
+junit_family = "xunit2"
+testpaths = ["tests"]
+
