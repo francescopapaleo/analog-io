@@ -11,7 +11,8 @@ import soundfile as sf
 from typing import Tuple, List
 
 
-def dbfs_to_linear(dbfs: float) -> float:
+
+def dbfs_to_amp(dbfs: float) -> float:
     """
     Convert dBFS to a linear amplitude scale.
 
@@ -26,6 +27,23 @@ def dbfs_to_linear(dbfs: float) -> float:
         The linear amplitude scale value.
     """
     return 10 ** (dbfs / 20)
+
+
+def amp_to_dbfs(amplitude: float) -> float:
+    """
+    Convert a linear amplitude scale to dBFS.
+
+    Parameters
+    ----------
+    amplitude : float
+        The linear amplitude scale value to convert.
+
+    Returns
+    -------
+    float
+        The dBFS value.
+    """
+    return 20 * np.log10(amplitude)
 
 
 class SignalGenerator:
@@ -57,7 +75,7 @@ class SignalGenerator:
             0, duration, int(self.sample_rate * duration), endpoint=False
         )
 
-    def gen_sin(
+    def sin(
         self, frequency: float, duration: float, amplitude_dbfs: float
     ) -> np.ndarray:
         """
@@ -78,10 +96,10 @@ class SignalGenerator:
             The generated sine waveform.
         """
         t = self.generate_time_array(duration)
-        amplitude = dbfs_to_linear(amplitude_dbfs)
+        amplitude = dbfs_to_amp(amplitude_dbfs)
         return amplitude * np.sin(2 * np.pi * frequency * t)
 
-    def gen_saw(
+    def saw(
         self, frequency: float, duration: float, amplitude_dbfs: float
     ) -> np.ndarray:
         """
@@ -102,10 +120,10 @@ class SignalGenerator:
             The generated sawtooth waveform.
         """
         t = self.generate_time_array(duration)
-        amplitude = dbfs_to_linear(amplitude_dbfs)
+        amplitude = dbfs_to_amp(amplitude_dbfs)
         return amplitude * scipy.signal.sawtooth(2 * np.pi * frequency * t)
 
-    def gen_sqr(
+    def sqr(
         self, frequency: float, duration: float, amplitude_dbfs: float
     ) -> np.ndarray:
         """
@@ -126,10 +144,10 @@ class SignalGenerator:
             The generated square waveform.
         """
         t = self.generate_time_array(duration)
-        amplitude = dbfs_to_linear(amplitude_dbfs)
+        amplitude = dbfs_to_amp(amplitude_dbfs)
         return amplitude * scipy.signal.square(2 * np.pi * frequency * t)
 
-    def gen_pulse(
+    def pulse(
         self, duration: float, amplitude_dbfs: float, pulse_width: float
     ) -> np.ndarray:
         """
@@ -150,13 +168,51 @@ class SignalGenerator:
             The generated pulse waveform.
         """
         t = self.generate_time_array(duration)
-        amplitude = dbfs_to_linear(amplitude_dbfs)
+        amplitude = dbfs_to_amp(amplitude_dbfs)
         pulse = np.zeros_like(t)
         pulse_samples = int(self.sample_rate * pulse_width)
         pulse[:pulse_samples] = amplitude  # Set the pulse for the beginning
         return pulse
+    
+    def log_sweep(
+            self,
+            f0: float,
+            f1: float,
+            duration: float,
+            amplitude_dbfs: float,
+            inverse: bool = False,
+    ) -> np.ndarray:
+        """
+        Generate a logarithmic swept sine waveform.
 
-    def adjust_channels(self, signal: np.ndarray) -> np.ndarray:
+        Parameters
+        ----------
+        f0 : float
+            The start frequency of the sweep.
+        f1 : float
+            The end frequency of the sweep.
+        duration : float
+            The duration of the sweep.
+        amplitude_dbfs : float
+            The amplitude of the sweep in dBFS.
+        inverse : bool, optional
+            Whether to use an inverse sweep (default is False).
+
+        Returns
+        -------
+        np.ndarray
+            The generated swept sine waveform.
+        """
+        t = self.generate_time_array(duration)
+        amplitude = dbfs_to_amp(amplitude_dbfs)
+        R = np.log(f1 / f0)
+        output = np.sin((2.0 * np.pi * f0 * duration / R) * (np.exp(t * R / duration) - 1))
+        if inverse:
+            k = np.exp(t * R / duration)
+            output = output[::-1] / k
+        return amplitude * output
+
+    def mono_to_stereo(self, signal: np.ndarray) -> np.ndarray:
         """
         Adjust the signal for the specified channel mode.
 
@@ -244,9 +300,9 @@ class SignalGenerator:
         np.ndarray
             The generated waveform.
         """
-        waveform_method = getattr(self, f"gen_{waveform}")
+        waveform_method = getattr(self, f"{waveform}")
         signal = waveform_method(frequency, duration, amplitude_dbfs)
-        signal = self.adjust_channels(signal)
+        signal = self.mono_to_stereo(signal)
         return self.place_signal(signal, start_time, total_duration)
 
 
@@ -314,7 +370,7 @@ class HardwareLatencyMeasure:
         numpy.ndarray
             The generated pulse signal. Shape: (duration * sample_rate, 1)
         """
-        test_pulse_signal = self.signal_generator.gen_pulse(
+        test_pulse_signal = self.signal_generator.pulse(
             self.duration, self.amplitude_dbfs, self.pulse_width
         )
         return test_pulse_signal.reshape(-1, 1)
@@ -374,43 +430,16 @@ class HardwareLatencyMeasure:
         return latency_time, latency_index
 
 
-class AnalogProcessor:
-    """
-    A class used to process audio files with analog effects.
-
-    Parameters
-    ----------
-    input_folder : str, optional
-        The input folder containing the dry audio files (default is "dry").
-    output_folder : str, optional
-        The output folder for the wet audio files (default is "wet").
-    sample_rate : int, optional
-        The sample rate to be used (default is 48000).
-    device_index : int, optional
-        The index of the audio device to be used (default is 6).
-    input_channel_index : int, optional
-        The index of the input channel to be used (default is 1).
-    output_channel_index : int, optional
-        The index of the output channel to be used (default is 3).
-    latency_samples : int, optional
-        The latency in samples for the audio device (default is 9526).
-    wait_time : float, optional
-        The time to wait after processing each file (default is 4.0).
-    """
-
+class HardwareAnalogDevice:
     def __init__(
         self,
-        input_folder: str = "dry",
-        output_folder: str = "wet",
         sample_rate: int = 48000,
-        device_index: int = 6,
-        input_channel_index: int = 1,
-        output_channel_index: int = 3,
-        latency_samples: int = 9526,
+        device_index: int = None,
+        input_channel_index: int = None,
+        output_channel_index: int = None,
+        latency_samples: int = 0,
         wait_time: float = 4.0,
-    ) -> None:
-        self.input_folder = input_folder
-        self.output_folder = output_folder
+    ):
         self.sample_rate = sample_rate
         self.device_index = device_index
         self.input_channel_index = input_channel_index
@@ -418,68 +447,56 @@ class AnalogProcessor:
         self.latency_samples = latency_samples
         self.wait_time = wait_time
 
-        # Ensure output directory exists
-        if not os.path.exists(self.output_folder):
-            os.makedirs(self.output_folder)
-
-    @staticmethod
-    def adjust_recording_for_latency(
-        recorded_signal: np.ndarray, latency_in_samples: int
-    ) -> np.ndarray:
+    def adjust_recording_for_latency(self, recorded_signal: np.ndarray) -> np.ndarray:
         """
         Adjust the recording to remove the specified latency and compensate for the end.
         """
         # Remove latency at the beginning
-        adjusted_signal = recorded_signal[latency_in_samples:]
+        adjusted_signal = recorded_signal[self.latency_samples:]
 
         # Compensate for the removed latency by adding silence at the end
-        silence_duration_samples = latency_in_samples
-        silence = np.zeros(silence_duration_samples)
+        silence = np.zeros(self.latency_samples)
         compensated_signal = np.concatenate([adjusted_signal, silence])
 
         return compensated_signal
 
-    def process_files(self) -> None:
+    def process_audio(self, audio: np.ndarray) -> np.ndarray:
         """
-        Process all WAV files in the input folder, applying effects and saving to the output folder.
+        Process the given audio array through an external device and adjust for latency.
+
+        Parameters
+        ----------
+        audio : np.ndarray
+            The audio array to be processed.
+
+        Returns
+        -------
+        np.ndarray
+            The processed audio array.
         """
-        file_paths = [
-            os.path.join(self.input_folder, f)
-            for f in os.listdir(self.input_folder)
-            if f.endswith(".wav")
-        ]
+        if self.device_index is None or self.input_channel_index is None or self.output_channel_index is None:
+            raise ValueError("Device and channel indices must be set before processing.")
 
-        for file_path in file_paths:
-            audio, fs = sf.read(file_path)
+        # Ensure the audio is mono for playback
+        if audio.ndim > 1:
+            audio = audio[:, 0]  # Use the first channel if stereo
 
-            # Ensure the audio is mono for playback
-            if audio.ndim > 1:
-                audio = audio[:, 0]  # Use the first channel if stereo
+        # Play and record simultaneously
+        recorded_signal = sd.playrec(
+            audio[:, np.newaxis],
+            samplerate=self.sample_rate,
+            input_mapping=[self.input_channel_index],
+            output_mapping=[self.output_channel_index],
+            device=self.device_index,
+            channels=1,
+        )
+        sd.wait()  # Wait until recording is finished
 
-            # Play and record simultaneously
-            recorded_signal = sd.playrec(
-                audio[:, np.newaxis],
-                samplerate=fs,
-                input_mapping=[self.input_channel_index],
-                output_mapping=[self.output_channel_index],
-                device=self.device_index,
-                channels=1,
-            )
-            sd.wait()  # Wait until recording is finished
+        # Adjust recording for latency and compensate at the end
+        adjusted_recording = self.adjust_recording_for_latency(recorded_signal[:, 0])
 
-            # Adjust recording for latency and compensate at the end
-            adjusted_recording = self.adjust_recording_for_latency(
-                recorded_signal[:, 0], self.latency_samples
-            )
+        # Wait for the external device to become silent
+        time.sleep(self.wait_time)
 
-            # Modify the filename pattern from 'dry_' to 'wet_'
-            new_filename = os.path.basename(file_path).replace("dry_", "wet_")
-            output_file_path = os.path.join(self.output_folder, new_filename)
+        return adjusted_recording
 
-            # Save the adjusted recording
-            sf.write(output_file_path, adjusted_recording, fs, subtype="PCM_24")
-
-            # Wait for the external device to become silent
-            time.sleep(self.wait_time)
-
-        print("Finished processing all files.")

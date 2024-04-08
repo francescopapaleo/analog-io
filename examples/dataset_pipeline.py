@@ -65,9 +65,9 @@ tester = HardwareLatencyMeasure()
 tester.select_device_and_channels()
 latency_time, latency_index = tester.measure_latency()
 
-from analog_io import AnalogProcessor
+from analog_io import HardwareAnalogDevice
 
-processor = AnalogProcessor(
+processor = HardwareAnalogDevice(
     input_folder="/Users/fra/Desktop/sandbox/dry",
     output_folder="/Users/fra/Desktop/sandbox/wet",
     sample_rate=48000,

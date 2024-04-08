@@ -4,13 +4,13 @@ Copyright (C) 2024 Francesco Papaleo
 
 import pytest
 import numpy as np
-from analog_io import SignalGenerator, HardwareLatencyMeasure, dbfs_to_linear
+from analog_io import SignalGenerator, HardwareLatencyMeasure, dbfs_to_amp
 
 
 def test_dbfs_to_linear():
-    assert dbfs_to_linear(0) == 1
-    assert dbfs_to_linear(-6) == pytest.approx(0.501187, 0.0001)
-    assert dbfs_to_linear(-20) == 0.1
+    assert dbfs_to_amp(0) == 1
+    assert dbfs_to_amp(-6) == pytest.approx(0.501187, 0.0001)
+    assert dbfs_to_amp(-20) == 0.1
 
 
 def test_generate_time_array():
@@ -30,7 +30,7 @@ def test_waveform_generation(waveform):
 def test_adjust_channels():
     sg = SignalGenerator(sample_rate=1000, channel_mode="stereo")
     signal = np.ones(1000)
-    adjusted_signal = sg.adjust_channels(signal)
+    adjusted_signal = sg.mono_to_stereo(signal)
     assert adjusted_signal.shape == (1000, 2)
     assert np.all(adjusted_signal == np.stack((signal, signal), axis=-1))
 
