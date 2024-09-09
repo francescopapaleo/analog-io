@@ -23,7 +23,7 @@ def test_generate_time_array():
 @pytest.mark.parametrize("waveform", ["sin", "saw", "sqr"])
 def test_waveform_generation(waveform):
     sg = SignalGenerator(sample_rate=1000)
-    signal = getattr(sg, f"gen_{waveform}")(100, 1, -3)
+    signal = getattr(sg, f"{waveform}")(100, 1, -3)
     assert len(signal) == 1000
 
 

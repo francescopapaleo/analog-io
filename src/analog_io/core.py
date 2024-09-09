@@ -11,7 +11,6 @@ import soundfile as sf
 from typing import Tuple, List
 
 
-
 def dbfs_to_amp(dbfs: float) -> float:
     """
     Convert dBFS to a linear amplitude scale.
@@ -173,14 +172,14 @@ class SignalGenerator:
         pulse_samples = int(self.sample_rate * pulse_width)
         pulse[:pulse_samples] = amplitude  # Set the pulse for the beginning
         return pulse
-    
+
     def log_sweep(
-            self,
-            f0: float,
-            f1: float,
-            duration: float,
-            amplitude_dbfs: float,
-            inverse: bool = False,
+        self,
+        f0: float,
+        f1: float,
+        duration: float,
+        amplitude_dbfs: float,
+        inverse: bool = False,
     ) -> np.ndarray:
         """
         Generate a logarithmic swept sine waveform.
@@ -206,7 +205,9 @@ class SignalGenerator:
         t = self.generate_time_array(duration)
         amplitude = dbfs_to_amp(amplitude_dbfs)
         R = np.log(f1 / f0)
-        output = np.sin((2.0 * np.pi * f0 * duration / R) * (np.exp(t * R / duration) - 1))
+        output = np.sin(
+            (2.0 * np.pi * f0 * duration / R) * (np.exp(t * R / duration) - 1)
+        )
         if inverse:
             k = np.exp(t * R / duration)
             output = output[::-1] / k
@@ -452,7 +453,7 @@ class HardwareAnalogDevice:
         Adjust the recording to remove the specified latency and compensate for the end.
         """
         # Remove latency at the beginning
-        adjusted_signal = recorded_signal[self.latency_samples:]
+        adjusted_signal = recorded_signal[self.latency_samples :]
 
         # Compensate for the removed latency by adding silence at the end
         silence = np.zeros(self.latency_samples)
@@ -474,8 +475,14 @@ class HardwareAnalogDevice:
         np.ndarray
             The processed audio array.
         """
-        if self.device_index is None or self.input_channel_index is None or self.output_channel_index is None:
-            raise ValueError("Device and channel indices must be set before processing.")
+        if (
+            self.device_index is None
+            or self.input_channel_index is None
+            or self.output_channel_index is None
+        ):
+            raise ValueError(
+                "Device and channel indices must be set before processing."
+            )
 
         # Ensure the audio is mono for playback
         if audio.ndim > 1:
@@ -499,4 +506,3 @@ class HardwareAnalogDevice:
         time.sleep(self.wait_time)
 
         return adjusted_recording
-
